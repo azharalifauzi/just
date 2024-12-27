@@ -36,10 +36,10 @@ pub enum TokenType {
     And,
     Or,
     Question,
-    LessThan,
-    LessThanEqual,
-    GreaterThan,
-    GreaterThanEqual,
+    Lesser,
+    LesserEqual,
+    Greater,
+    GreaterEqual,
 
     // Punctuation
     LParen,   // (
@@ -59,14 +59,14 @@ pub enum TokenType {
     Eof, // End of file/input
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Token {
-    ttype: TokenType,
-    lexeme: String,
-    line: usize,
-    col: usize,
-    start_pos: usize,
-    end_pos: usize,
+    pub ttype: TokenType,
+    pub lexeme: String,
+    pub line: usize,
+    pub col: usize,
+    pub start_pos: usize,
+    pub end_pos: usize,
 }
 
 pub struct Lexer {
@@ -80,7 +80,7 @@ pub struct Lexer {
 
 impl Lexer {
     pub fn new(source: String) -> Self {
-        Lexer {
+        Self {
             source,
             tokens: vec![],
             line: 1,
@@ -167,20 +167,20 @@ impl Lexer {
                 '<' => match self.peek() {
                     Some('=') => {
                         self.advance();
-                        self.add_token(TokenType::LessThanEqual);
+                        self.add_token(TokenType::LesserEqual);
                     }
                     Some(_) => {
-                        self.add_token(TokenType::LessThan);
+                        self.add_token(TokenType::Lesser);
                     }
                     None => {}
                 },
                 '>' => match self.peek() {
                     Some('=') => {
                         self.advance();
-                        self.add_token(TokenType::GreaterThanEqual);
+                        self.add_token(TokenType::GreaterEqual);
                     }
                     Some(_) => {
-                        self.add_token(TokenType::GreaterThan);
+                        self.add_token(TokenType::Greater);
                     }
                     None => {}
                 },
