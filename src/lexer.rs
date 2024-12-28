@@ -86,7 +86,7 @@ impl Lexer {
             line: 1,
             current: 0,
             start: 0,
-            col: 0,
+            col: 1,
         }
     }
 
@@ -243,7 +243,7 @@ impl Lexer {
 
     fn advance_line(&mut self) {
         self.line += 1;
-        self.col = 0;
+        self.col = 1;
     }
 
     fn number(&mut self) {

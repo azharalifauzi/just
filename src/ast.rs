@@ -27,18 +27,20 @@ pub enum Expression {
     },
     ArrayLiteral(Vec<Expression>),
     ObjectLiteral(Vec<(String, Expression)>),
-    Function {
-        parameters: Vec<String>,
-        body: Box<Statement>,
-    },
 }
 
 #[derive(Debug)]
 pub enum Statement {
-    ExpressionStmt(Expression), // An expression used as a statement
+    Expression(Expression), // An expression used as a statement
     VariableDeclaration {
         name: String,
         initializer: Option<Expression>,
+        can_reassign: bool,
+    },
+    FunctionDeclaration {
+        name: String,
+        parameters: Vec<String>,
+        body: Vec<Statement>,
     },
     Block(Vec<Statement>), // Represents `{ ... }`
     If {
@@ -59,4 +61,5 @@ pub enum Literal {
     String(String),
     Boolean(bool),
     Null,
+    Void,
 }

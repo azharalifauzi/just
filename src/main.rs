@@ -7,7 +7,14 @@ mod parser;
 
 fn main() {
     let source = r#"
-    -5 * -(2 * 5); 1 + 2;
+    function add(a, b) {
+        return a + b
+    }
+
+    {
+        let a = 1 + 2
+        add(a, b)
+    }
     "#
     .to_string();
     let mut lexer = Lexer::new(source);
