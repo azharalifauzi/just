@@ -170,7 +170,7 @@ impl Parser {
 
         while *next_ttype == TokenType::EqualEqual || *next_ttype == TokenType::BangEqual {
             self.advance();
-            let operator = self.peek().lexeme.clone();
+            let operator = self.peek().ttype.clone();
             self.advance();
             let right = self.expression()?;
 
@@ -196,7 +196,7 @@ impl Parser {
             || *next_ttype == TokenType::LesserEqual
         {
             self.advance();
-            let operator = self.peek().lexeme.clone();
+            let operator = self.peek().ttype.clone();
             self.advance();
             let right = self.expression()?;
 
@@ -218,7 +218,7 @@ impl Parser {
 
         while *next_ttype == TokenType::Plus || *next_ttype == TokenType::Minus {
             self.advance();
-            let operator = self.peek().lexeme.clone();
+            let operator = self.peek().ttype.clone();
             self.advance();
             let right = self.expression()?;
 
@@ -244,7 +244,7 @@ impl Parser {
             || *next_ttype == TokenType::Percent
         {
             self.advance();
-            let operator = self.peek().lexeme.clone();
+            let operator = self.peek().ttype.clone();
             self.advance();
             let right = self.expression()?;
 

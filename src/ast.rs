@@ -1,3 +1,5 @@
+use crate::lexer::TokenType;
+
 #[derive(Debug)]
 pub enum Expression {
     Literal(Literal),
@@ -7,7 +9,7 @@ pub enum Expression {
     },
     Binary {
         left: Box<Expression>,
-        operator: String,
+        operator: TokenType,
         right: Box<Expression>,
     },
     Grouping(Box<Expression>),
@@ -55,7 +57,7 @@ pub enum Statement {
     Return(Option<Expression>), // Supports `return;` and `return expr;`
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Literal {
     Number(f64),
     String(String),
