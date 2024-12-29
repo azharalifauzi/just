@@ -117,5 +117,6 @@ fn is_truthy(value: &Value) -> bool {
         Value::Boolean(b) => *b,
         Value::Null => false,
         Value::Void => false,
+        Value::Function(_) => true,
     }
 }

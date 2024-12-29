@@ -1,5 +1,7 @@
 use std::{collections::HashMap, fmt};
 
+use crate::ast::Statement;
+
 #[derive(Debug, Clone)]
 
 pub enum Value {
@@ -8,6 +10,7 @@ pub enum Value {
     Boolean(bool),
     Null,
     Void,
+    Function(Statement),
 }
 
 impl fmt::Display for Value {
@@ -18,6 +21,7 @@ impl fmt::Display for Value {
             Value::Boolean(b) => write!(f, "{}", b),
             Value::Null => write!(f, "null"),
             Value::Void => write!(f, "void"),
+            Value::Function(_) => write!(f, "[Function]"),
         }
     }
 }

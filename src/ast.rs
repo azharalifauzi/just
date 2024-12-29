@@ -1,6 +1,6 @@
 use crate::lexer::TokenType;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expression {
     Literal(Literal),
     Unary {
@@ -31,7 +31,7 @@ pub enum Expression {
     ObjectLiteral(Vec<(String, Expression)>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Statement {
     Expression(Expression), // An expression used as a statement
     VariableDeclaration {
