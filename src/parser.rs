@@ -15,6 +15,11 @@ impl Parser {
         let mut statements = Vec::new();
 
         while !self.is_at_end() {
+            if self.peek().ttype == TokenType::SemiColon {
+                self.advance();
+                continue;
+            }
+
             statements.push(self.statement()?);
             self.advance();
         }
@@ -41,7 +46,6 @@ impl Parser {
                     _ => Ok(Statement::Return(Some(self.expression()?))),
                 }
             }
-            TokenType::SemiColon => Ok(Statement::Expression(Expression::Literal(Literal::Void))),
             _ => Ok(Statement::Expression(self.expression()?)),
         }
     }
@@ -88,13 +92,16 @@ impl Parser {
                 return Err(err);
             }
 
-            statements.push(self.statement()?);
-
-            if self.peek_next().ttype == TokenType::RBrace {
+            if self.peek().ttype == TokenType::SemiColon {
                 self.advance();
+                continue;
+            }
+
+            if self.peek().ttype == TokenType::RBrace {
                 break;
             }
 
+            statements.push(self.statement()?);
             self.advance();
         }
 
@@ -347,7 +354,6 @@ impl Parser {
                 }
                 _ => Ok(Expression::Variable(v.to_string())),
             },
-            TokenType::Eof => Ok(Expression::Literal(Literal::Void)),
             _ => {
                 let err = format!(
                     "Unexpected token {:?}, at {}:{}",

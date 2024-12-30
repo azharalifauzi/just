@@ -63,5 +63,4 @@ pub enum Literal {
     String(String),
     Boolean(bool),
     Null,
-    Void,
 }

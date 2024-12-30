@@ -1,6 +1,6 @@
 use crate::{
     ast::{Expression, Literal, Statement},
-    environment::{Environment, Value},
+    environment::{Environment, FunctionExpression, Value},
     lexer::TokenType,
 };
 
@@ -23,10 +23,7 @@ impl Interpreter {
                 Statement::Expression(expr) => {
                     let value = self.evaluate(&expr)?;
 
-                    match value {
-                        Value::Void => {}
-                        _ => last_value = Some(value),
-                    }
+                    last_value = Some(value);
                 }
                 _ => {
                     self.execute(&statement)?;
@@ -43,6 +40,47 @@ impl Interpreter {
                 self.evaluate(expr)?;
                 Ok(())
             }
+            Statement::VariableDeclaration {
+                name,
+                initializer,
+                can_reassign,
+            } => match initializer {
+                Some(expr) => {
+                    let value = self.evaluate(expr)?;
+                    self.environment.define(name.to_string(), value);
+                    Ok(())
+                }
+                None => {
+                    if *can_reassign {
+                        self.environment.define(name.to_string(), Value::Null);
+                        Ok(())
+                    } else {
+                        Err("const missing initializer".to_string())
+                    }
+                }
+            },
+            Statement::FunctionDeclaration {
+                name,
+                parameters,
+                body,
+            } => {
+                self.environment.define(
+                    name.to_string(),
+                    Value::Function(Box::new(FunctionExpression::new(
+                        parameters.clone(),
+                        body.to_vec(),
+                    ))),
+                );
+                Ok(())
+            }
+            Statement::Block(statements) => {
+                self.enter_scope();
+                for statement in statements {
+                    self.execute(statement)?
+                }
+                self.exit_scope();
+                Ok(())
+            }
             _ => Err("Unknown statement".to_string()),
         }
     }
@@ -54,7 +92,6 @@ impl Interpreter {
                 Literal::String(s) => Ok(Value::String(s.clone())),
                 Literal::Boolean(b) => Ok(Value::Boolean(*b)),
                 Literal::Null => Ok(Value::Null),
-                Literal::Void => Ok(Value::Void),
             },
             Expression::Grouping(expr) => self.evaluate(expr),
             Expression::Unary { operator, right } => {
@@ -105,7 +142,61 @@ impl Interpreter {
                     _ => Err("Invalid binary operation".to_string()),
                 }
             }
+            Expression::Variable(name) => match self.environment.get(name) {
+                Some(v) => Ok(v),
+                None => Ok(Value::Null),
+            },
+            Expression::Call { callee, arguments } => {
+                if let Value::Function(func_expr) = self.evaluate(&callee)? {
+                    let expr = *func_expr;
+
+                    self.enter_scope();
+
+                    for (index, arg) in arguments.iter().enumerate() {
+                        let value = self.evaluate(arg)?;
+                        if index <= arguments.len() {
+                            let var_name = &expr.parameters[index];
+                            self.environment.define(var_name.to_string(), value);
+                        } else {
+                            break;
+                        }
+                    }
+
+                    let mut returned_value = Value::Null;
+
+                    for statement in expr.body {
+                        match statement {
+                            Statement::Return(v) => {
+                                if let Some(expr) = v {
+                                    returned_value = self.evaluate(&expr)?;
+                                }
+                            }
+                            _ => self.execute(&statement)?,
+                        }
+                    }
+
+                    self.exit_scope();
+
+                    Ok(returned_value)
+                } else {
+                    let var_name = self.evaluate(&callee)?;
+                    Err(format!("{} is not a function", var_name))
+                }
+            }
             _ => Err("Expression is not implemented yet".to_string()),
+        }
+    }
+
+    fn enter_scope(&mut self) {
+        let new_env = Environment::with_parent(self.environment.clone());
+        self.environment = new_env;
+    }
+
+    fn exit_scope(&mut self) {
+        if let Some(parent) = self.environment.parent.take() {
+            self.environment = *parent;
+        } else {
+            panic!("Cannot exit from the global scope")
         }
     }
 }
@@ -116,7 +207,6 @@ fn is_truthy(value: &Value) -> bool {
         Value::String(v) => v.clone().len() > 0,
         Value::Boolean(b) => *b,
         Value::Null => false,
-        Value::Void => false,
         Value::Function(_) => true,
     }
 }

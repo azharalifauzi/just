@@ -4,13 +4,25 @@ use crate::ast::Statement;
 
 #[derive(Debug, Clone)]
 
+pub struct FunctionExpression {
+    pub parameters: Vec<String>,
+    pub body: Vec<Statement>,
+}
+
+impl FunctionExpression {
+    pub fn new(parameters: Vec<String>, body: Vec<Statement>) -> Self {
+        Self { parameters, body }
+    }
+}
+
+#[derive(Debug, Clone)]
+
 pub enum Value {
     Number(f64),
     String(String),
     Boolean(bool),
     Null,
-    Void,
-    Function(Statement),
+    Function(Box<FunctionExpression>),
 }
 
 impl fmt::Display for Value {
@@ -20,16 +32,15 @@ impl fmt::Display for Value {
             Value::String(s) => write!(f, "\"{}\"", s),
             Value::Boolean(b) => write!(f, "{}", b),
             Value::Null => write!(f, "null"),
-            Value::Void => write!(f, "void"),
             Value::Function(_) => write!(f, "[Function]"),
         }
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Environment {
     values: HashMap<String, Value>,
-    parent: Option<Box<Environment>>,
+    pub parent: Option<Box<Environment>>,
 }
 
 impl Environment {

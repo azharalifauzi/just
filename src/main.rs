@@ -10,7 +10,15 @@ mod parser;
 
 fn main() {
     let source = r#"
-    (1 + 2) ** (3 - 1);
+    function pow(a, b) {
+        return a ** b
+    }
+
+    function add(a, b) {
+        return a + b
+    }
+        
+    add(pow(2, 3), 2);
     "#
     .to_string();
     let mut lexer = Lexer::new(source);
@@ -18,6 +26,8 @@ fn main() {
     let mut parser = Parser::new(tokens);
     let ast = parser.parse().unwrap();
     let mut interpreter = Interpreter::new();
+
+    // println!("{:#?}", ast);
 
     match interpreter.interpret(ast) {
         Ok(v) => match v {
